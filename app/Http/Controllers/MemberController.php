@@ -663,4 +663,241 @@ class MemberController extends Controller
         flash(translate('Something Went Wrong!'))->error();
         return back();
     }
+
+    public function saveMemberAllInfo(Request $request, $id)
+    {
+        try {
+            $rules = [
+                'introduction'      => ['required'],
+
+                'first_name'    => ['required', 'max:255'],
+                'middle_name'    => ['required', 'max:255'],
+                'last_name'     => ['required', 'max:255'],
+                'gender'        => ['required'],
+                'date_of_birth' => ['required'],
+                'on_behalf'     => ['required'],
+                'marital_status' => ['required'],
+
+                'present_country_id'   => ['required'],
+                'present_state_id'     => ['required'],
+                'present_city_id'      => ['required'],
+                'present_postal_code'  => ['required'],
+                'address1' => ['required'],
+                'address2' => ['required'],
+
+                'permanent_country_id'   => ['required'],
+                'permanent_state_id'     => ['required'],
+                'permanent_city_id'      => ['required'],
+                'permanent_postal_code'  => ['required'],
+                'permanent_address1' => ['required'],
+                'permanent_address2' => ['required'],
+
+                'height'       => ['required', 'numeric'],
+                'weight'       => ['required', 'numeric'],
+                'eye_color'    => ['required', 'max:50'],
+                'hair_color'   => ['required', 'max:50'],
+                'complexion'   => ['required', 'max:50'],
+                'blood_group'  => ['required', 'max:3'],
+                'body_type'    => ['required', 'max:50'],
+                'body_art'     => ['required', 'max:50'],
+                'disability'   => ['required', 'max:255'],
+
+                'mothere_tongue' => ['required'],
+                'known_languages' => ['required'],
+
+                'birth_country_id' => ['required'],
+                'recidency_country_id' => ['required'],
+                'growup_country_id' => ['required'],
+                'immigration_status' => ['required', 'max:255'],
+
+                'member_religion_id'   => ['required', 'max:255'],
+                'member_caste_id'      => ['required', 'max:255'],
+                'ethnicity'            => ['max:255'],
+                'personal_value'       => ['max:255'],
+                'community_value'      => ['max:255'],
+                'member_sub_caste_id'   => ['required'],
+                'family_value_id'   => ['required'],
+
+                'father'   => ['max:255'],
+                'mother'   => ['max:255'],
+                'sibling.*'  => ['max:255'],
+                'grand_mother'  => ['max:255'],
+                'grand_father'  => ['max:255'],
+                'nana'  => ['max:255'],
+                'nani'  => ['max:255'],
+                'father_prof'  => ['max:255'],
+                'father_educ'  => ['max:255'],
+                'mother_prof'  => ['max:255'],
+                'mother_educ'  => ['max:255'],
+                'sibling_m_s.*'  => ['max:255'],
+                'Yon_old.*'  => ['max:255'],
+                'relation.*'  => ['max:255'],
+                'father_phone' => ['required', 'max:255'],
+                'mother_phone' => ['required', 'max:255'],
+                'sibiling_phone.*' => ['max:255'],
+                'guardian_name' => ['max:255'],
+                'guardian_phone' => ['required', 'max:255'],
+            ];
+
+            $validator  = Validator::make($request->all(), $rules);
+            if ($validator->fails()) {
+                flash(translate('Sorry! Something went wrong'))->error();
+                return Redirect::back()->withErrors($validator);
+            }
+
+            $memberId  = $id;
+            // Member
+            $member = Member::findOrFail($memberId);
+            $member->introduction = $request->introduction;
+            $member->gender             = $request->gender;
+            $member->on_behalves_id     = $request->on_behalf;
+            $member->birthday           = date('Y-m-d', strtotime($request->date_of_birth));
+            $member->marital_status_id  = $request->marital_status;
+            $member->children           = $request->children;
+            $member->mothere_tongue     = $request->mothere_tongue;
+            $member->known_languages    = $request->known_languages;
+            $member->save();
+
+            $id = $member->user_id;
+            // User
+            $user               = User::findOrFail($id);
+            $user->first_name   = $request->first_name;
+            $user->middle_name   = $request->middle_name;
+            $user->last_name    = $request->last_name;
+            $user->email    = $request->email;
+
+            if (get_setting('profile_picture_approval_by_admin') && $request->photo != $user->photo && auth()->user()->user_type == 'member') {
+                $user->photo_approved = 0;
+            }
+            $user->photo        = $request->photo;
+            $user->phone        = $request->phone;
+            $user->save();
+
+            // Address
+            $address_type = $request->address_type;
+
+            
+            if ($request->address_type == 'present') {
+                $address = Address::where('user_id', $id)->where('type', $request->address_type)->first();
+                if (empty($address)) {
+                    $address = new Address;
+                    $address->user_id = $id;
+                }
+                $address->country_id   = $request->present_country_id;
+                $address->state_id     = $request->present_state_id;
+                $address->city_id      = $request->present_city_id;
+                $address->postal_code  = $request->present_postal_code;
+                $address->address1  = $request->address1;
+                $address->address2  = $request->address2;
+                $address->type             = $request->address_type;
+
+                $address->save();
+            }
+
+            if ($request->permanent_address_type == 'permanent') {
+                $address = Address::where('user_id', $id)->where('type', $request->permanent_address_type)->first();
+                if (empty($address)) {
+                    $address = new Address;
+                    $address->user_id = $id;
+                }
+                $address->country_id   = $request->permanent_country_id;
+                $address->state_id     = $request->permanent_state_id;
+                $address->city_id      = $request->permanent_city_id;
+                $address->postal_code  = $request->permanent_postal_code;
+                $address->address1  = $request->permanent_address1;
+                $address->address2  = $request->permanent_address2;
+                $address->type             = $request->permanent_address_type;
+                $address->save();
+            }
+
+
+            // Physical Attribute
+            $physical_attribute = PhysicalAttribute::where('user_id', $id)->first();
+            if (empty($physical_attribute)) {
+                $physical_attribute = new PhysicalAttribute;
+                $physical_attribute->user_id = $id;
+            }
+
+            $physical_attribute->height        = $request->height;
+            $physical_attribute->weight        = $request->weight;
+            $physical_attribute->eye_color     = $request->eye_color;
+            $physical_attribute->hair_color    = $request->hair_color;
+            $physical_attribute->complexion    = $request->complexion;
+            $physical_attribute->blood_group   = $request->blood_group;
+            $physical_attribute->body_type     = $request->body_type;
+            $physical_attribute->body_art      = $request->body_art;
+            $physical_attribute->disability    = $request->disability;
+
+            $physical_attribute->save();
+
+            // Recidency
+            $recidencies = Recidency::where('user_id', $id)->first();
+            if (empty($recidencies)) {
+                $recidencies = new Recidency;
+                $recidencies->user_id = $id;
+            }
+
+            $recidencies->birth_country_id         = $request->birth_country_id;
+            $recidencies->recidency_country_id     = $request->recidency_country_id;
+            $recidencies->growup_country_id        = $request->growup_country_id;
+            $recidencies->immigration_status       = $request->immigration_status;
+
+            $recidencies->save();
+
+
+            // Spirtiual
+            $spiritual_backgrounds = SpiritualBackground::where('user_id', $id)->first();
+            if (empty($spiritual_backgrounds)) {
+                $spiritual_backgrounds          = new SpiritualBackground;
+                $spiritual_backgrounds->user_id = $id;
+            }
+
+            $spiritual_backgrounds->religion_id        = $request->member_religion_id;
+            $spiritual_backgrounds->caste_id           = $request->member_caste_id;
+            $spiritual_backgrounds->sub_caste_id       = $request->member_sub_caste_id;
+            $spiritual_backgrounds->ethnicity           = $request->ethnicity;
+            $spiritual_backgrounds->personal_value       = $request->personal_value;
+            $spiritual_backgrounds->family_value_id       = $request->family_value_id;
+            $spiritual_backgrounds->community_value       = $request->community_value;
+
+            $spiritual_backgrounds->save();
+
+            // Families
+            $family = Family::where('user_id', $id)->first();
+            if (empty($family)) {
+                $family           = new Family;
+                $family->user_id  = $id;
+            }
+
+            $family->father = $request->father;
+            $family->mother = $request->mother;
+            $family->father_phone = $request->father_phone;
+            $family->mother_phone = $request->mother_phone;
+            $family->sibiling_phone = json_encode($request->input('sibiling_phone'));
+            $family->guardian_name = $request->guardian_name;
+            $family->guardian_phone = $request->guardian_phone;
+            $family->sibling = json_encode($request->input('sibling'));
+            $family->Yon_old = json_encode($request->input('Yon_old'));
+            $family->relation = json_encode($request->input('relation'));
+            $family->grand_father = $request->grand_father;
+            $family->grand_mother = $request->grand_mother;
+            $family->nana = $request->nana;
+            $family->nani = $request->nani;
+            $family->father_prof = $request->father_prof;
+            $family->father_educ = $request->father_educ;
+            $family->mother_prof = $request->mother_prof;
+            $family->mother_educ = $request->mother_educ;
+            $family->sibling_m_s = json_encode($request->input('sibling_m_s'));
+
+            $family->save();
+
+            User::where('id', $id)->update(['is_profile_updated' => 1]);
+
+            flash(translate('Info has been updated successfully'))->success();
+            return back();
+        } catch (\Exception $e) {
+
+            throw $e;
+        }
+    }
 }

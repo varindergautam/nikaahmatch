@@ -136,8 +136,8 @@ class AddressController extends Controller
              $address->state_id     = $request->permanent_state_id;
              $address->city_id      = $request->permanent_city_id;
              $address->postal_code  = $request->permanent_postal_code;
-             $address->address1  = $request->address1;
-             $address->address2  = $request->address2;
+             $address->address1  = $request->permanent_address1;
+             $address->address2  = $request->permanent_address2;
          }
          $address->type             = $address_type;
 

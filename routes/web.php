@@ -158,6 +158,7 @@ Route::group(['middleware' => ['member', 'verified']], function () {
 
 Route::group(['middleware' => ['auth']], function () {
     // member info edit
+    Route::post('/members/saveMemberAllInfo/{id}', 'MemberController@saveMemberAllInfo')->name('member.saveMemberAllInfo');
     Route::post('/members/introduction_update/{id}', 'MemberController@introduction_update')->name('member.introduction.update');
     Route::post('/members/basic_info_update/{id}', 'MemberController@basic_info_update')->name('member.basic_info_update');
     Route::post('/members/language_info_update/{id}', 'MemberController@language_info_update')->name('member.language_info_update');

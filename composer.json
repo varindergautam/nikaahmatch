@@ -33,9 +33,10 @@
         "unicodeveloper/laravel-paystack": "^1.0"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.9",
         "beyondcode/laravel-dump-server": "^1.0",
-        "filp/whoops": "^2.0",
         "fakerphp/faker": "^1.9.1",
+        "filp/whoops": "^2.0",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^6.1",
         "phpunit/phpunit": "^9.5.10",

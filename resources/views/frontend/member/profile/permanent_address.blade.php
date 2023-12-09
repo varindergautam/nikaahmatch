@@ -11,15 +11,15 @@
                <div class="form-group row">
             <div class="col-md-6">
                  <label for="address1">{{translate('Address 1')}}</label>
-                <input type="text" name="address1" value="{{$address1}}" class="form-control" placeholder="{{translate('Address 1')}}" required>
-                @error('address1')
+                <input type="text" name="permanent_address1" value="{{$address1}}" class="form-control" placeholder="{{translate('Address 1')}}" required>
+                @error('permanent_address1')
                     <small class="form-text text-danger">{{ $message }}</small>
                 @enderror
             </div>
             <div class="col-md-6">
                  <label for="address2">{{translate('Address 2')}}</label>
-                <input type="text" name="address2" value="{{$address2}}" class="form-control" placeholder="{{translate('Address 2')}}" required>
-                @error('address2')
+                <input type="text" name="permanent_address2" value="{{$address2}}" class="form-control" placeholder="{{translate('Address 2')}}" required>
+                @error('permanent_address2')
                     <small class="form-text text-danger">{{ $message }}</small>
                 @enderror
             </div>

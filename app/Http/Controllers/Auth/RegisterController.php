@@ -118,6 +118,7 @@ class RegisterController extends Controller
                 'first_name'  => $data['first_name'],
                 'middle_name'  => $data['middle_name'],
                 'last_name'   => $data['last_name'],
+                'phone'         => $data['phone'],
                 'membership'  => 1,
                 'email'       => $data['email'],
                 'password'    => Hash::make($data['password']),
@@ -180,8 +181,6 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-      
-        
         if (filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
             if (User::where('email', $request->email)->first() != null) {
                 
